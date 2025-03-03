@@ -242,10 +242,26 @@
         });
     
         function fetchOilPrices() {
+            // 顯示載入中
+            document.getElementById('cpc-92').textContent = "載入中...";
+            document.getElementById('cpc-95').textContent = "載入中...";
+            document.getElementById('cpc-98').textContent = "載入中...";
+            document.getElementById('cpc-diesel').textContent = "載入中...";
+            document.getElementById('fpg-92').textContent = "載入中...";
+            document.getElementById('fpg-95').textContent = "載入中...";
+            document.getElementById('fpg-98').textContent = "載入中...";
+            document.getElementById('fpg-diesel').textContent = "載入中...";
+            document.getElementById('last-update').textContent = "正在更新...";
+            
             // 從油價資料 JSON 檔案載入資料
             // 添加時間戳參數避免瀏覽器緩存
             fetch('data/oil_prices.json?' + new Date().getTime())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('網路回應不正常: ' + response.status);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     console.log("獲取的資料:", data);
                     
@@ -264,17 +280,41 @@
                     // 更新最後更新時間
                     document.getElementById('last-update').textContent = data.update_time || '暫無資料';
                     
+                    // 顯示爬蟲執行時間
+                    if (data.crawl_time) {
+                        document.getElementById('crawl-time').textContent = "資料更新時間: " + data.crawl_time;
+                    }
+                    
+                    // 如果有備註，顯示備註
+                    if (data.note) {
+                        let noteElement = document.createElement('p');
+                        noteElement.style.fontSize = '0.9rem';
+                        noteElement.style.color = '#666';
+                        noteElement.textContent = "備註: " + data.note;
+                        document.getElementById('last-update').parentNode.appendChild(noteElement);
+                    }
+                    
                     // 如果有錯誤訊息，顯示在頁面上
                     if (data.error) {
                         let errorMsg = document.createElement('p');
-                        errorMsg.style.color = 'red';
-                        errorMsg.textContent = '爬蟲錯誤：' + data.error;
-                        document.getElementById('last-update').parentNode.appendChild(errorMsg);
+                        errorMsg.className = 'error-message';
+                        errorMsg.textContent = '發生錯誤：' + data.error;
+                        document.getElementById('error-container').appendChild(errorMsg);
+                        document.getElementById('retry-container').style.display = 'block';
+                    } else {
+                        document.getElementById('error-container').innerHTML = '';
+                        document.getElementById('retry-container').style.display = 'none';
                     }
                 })
                 .catch(error => {
                     console.error('無法取得油價資料:', error);
                     document.getElementById('last-update').textContent = '無法取得資料，請檢查網絡連接';
+                    
+                    let errorMsg = document.createElement('p');
+                    errorMsg.className = 'error-message';
+                    errorMsg.textContent = '發生錯誤：' + error.message;
+                    document.getElementById('error-container').appendChild(errorMsg);
+                    document.getElementById('retry-container').style.display = 'block';
                 });
         }
     </script>
