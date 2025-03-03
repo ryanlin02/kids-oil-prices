@@ -231,6 +231,7 @@
     </div>
     
     <!-- 內嵌 JavaScript -->
+    <!-- 在 index.html 中更新 JavaScript 部分 -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // 載入油價資料
@@ -239,88 +240,42 @@
             // 每隔一小時重新載入一次資料
             setInterval(fetchOilPrices, 3600000);
         });
-
+    
         function fetchOilPrices() {
-            // 顯示載入中狀態
-            document.getElementById('last-update').textContent = '載入中...';
-            document.getElementById('error-container').innerHTML = '';
-            document.getElementById('retry-container').style.display = 'none';
-            
             // 從油價資料 JSON 檔案載入資料
+            // 添加時間戳參數避免瀏覽器緩存
             fetch('data/oil_prices.json?' + new Date().getTime())
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('無法取得油價資料檔案');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
+                    console.log("獲取的資料:", data);
+                    
                     // 更新中油油價
-                    updatePriceDisplay('cpc-92', data.cpc['92']);
-                    updatePriceDisplay('cpc-95', data.cpc['95']);
-                    updatePriceDisplay('cpc-98', data.cpc['98']);
-                    updatePriceDisplay('cpc-diesel', data.cpc['diesel']);
+                    document.getElementById('cpc-92').textContent = data.cpc['92'] + (data.cpc['92'] !== '暫無資料' ? ' 元' : '');
+                    document.getElementById('cpc-95').textContent = data.cpc['95'] + (data.cpc['95'] !== '暫無資料' ? ' 元' : '');
+                    document.getElementById('cpc-98').textContent = data.cpc['98'] + (data.cpc['98'] !== '暫無資料' ? ' 元' : '');
+                    document.getElementById('cpc-diesel').textContent = data.cpc['diesel'] + (data.cpc['diesel'] !== '暫無資料' ? ' 元' : '');
                     
                     // 更新台塑油價
-                    updatePriceDisplay('fpg-92', data.fpg['92']);
-                    updatePriceDisplay('fpg-95', data.fpg['95']);
-                    updatePriceDisplay('fpg-98', data.fpg['98']);
-                    updatePriceDisplay('fpg-diesel', data.fpg['diesel']);
+                    document.getElementById('fpg-92').textContent = data.fpg['92'] + (data.fpg['92'] !== '暫無資料' ? ' 元' : '');
+                    document.getElementById('fpg-95').textContent = data.fpg['95'] + (data.fpg['95'] !== '暫無資料' ? ' 元' : '');
+                    document.getElementById('fpg-98').textContent = data.fpg['98'] + (data.fpg['98'] !== '暫無資料' ? ' 元' : '');
+                    document.getElementById('fpg-diesel').textContent = data.fpg['diesel'] + (data.fpg['diesel'] !== '暫無資料' ? ' 元' : '');
                     
                     // 更新最後更新時間
                     document.getElementById('last-update').textContent = data.update_time || '暫無資料';
                     
-                    // 顯示爬蟲執行時間
-                    if (data.crawl_time) {
-                        document.getElementById('crawl-time').textContent = '資料更新於: ' + data.crawl_time;
-                    }
-                    
-                    // 如果有錯誤訊息，顯示它
+                    // 如果有錯誤訊息，顯示在頁面上
                     if (data.error) {
-                        document.getElementById('error-container').innerHTML = '<p class="error-message">爬蟲報告錯誤: ' + data.error + '</p>';
-                        document.getElementById('retry-container').style.display = 'block';
-                    }
-                    
-                    // 檢查是否所有資料都是"暫無資料"
-                    const allNoData = 
-                        data.cpc['92'] === '暫無資料' &&
-                        data.cpc['95'] === '暫無資料' &&
-                        data.cpc['98'] === '暫無資料' &&
-                        data.cpc['diesel'] === '暫無資料' &&
-                        data.fpg['92'] === '暫無資料' &&
-                        data.fpg['95'] === '暫無資料' &&
-                        data.fpg['98'] === '暫無資料' &&
-                        data.fpg['diesel'] === '暫無資料';
-                        
-                    if (allNoData) {
-                        document.getElementById('error-container').innerHTML += '<p class="error-message">未能取得任何油價資料，請稍後再試。</p>';
-                        document.getElementById('retry-container').style.display = 'block';
+                        let errorMsg = document.createElement('p');
+                        errorMsg.style.color = 'red';
+                        errorMsg.textContent = '爬蟲錯誤：' + data.error;
+                        document.getElementById('last-update').parentNode.appendChild(errorMsg);
                     }
                 })
                 .catch(error => {
                     console.error('無法取得油價資料:', error);
-                    document.getElementById('last-update').textContent = '資料載入失敗';
-                    document.getElementById('error-container').innerHTML = '<p class="error-message">' + error.message + '</p>';
-                    document.getElementById('retry-container').style.display = 'block';
+                    document.getElementById('last-update').textContent = '無法取得資料，請檢查網絡連接';
                 });
-        }
-        
-        function updatePriceDisplay(elementId, priceValue) {
-            const element = document.getElementById(elementId);
-            
-            // 如果價格是"暫無資料"，添加特殊樣式
-            if (priceValue === '暫無資料') {
-                element.textContent = priceValue;
-                element.classList.add('temp-no-data');
-            } else {
-                // 檢查是否需要添加"元"字
-                if (priceValue && !priceValue.includes('元')) {
-                    element.textContent = priceValue + ' 元';
-                } else {
-                    element.textContent = priceValue;
-                }
-                element.classList.remove('temp-no-data');
-            }
         }
     </script>
 </body>
