@@ -76,6 +76,11 @@
             font-weight: bold;
             color: #e74c3c;
         }
+        
+        .temp-no-data {
+            color: #999;
+            font-style: italic;
+        }
 
         .update-info {
             background-color: white;
@@ -88,6 +93,12 @@
         #last-update {
             font-size: 1.2rem;
             color: #7f8c8d;
+        }
+        
+        #crawl-time {
+            font-size: 0.9rem;
+            color: #95a5a6;
+            margin-top: 5px;
         }
 
         footer {
@@ -120,6 +131,35 @@
             h2 {
                 font-size: 1.5rem;
             }
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        
+        .retry-button {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
+        .retry-button:hover {
+            background-color: #2980b9;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -177,6 +217,11 @@
             <section class="update-info">
                 <h2>更新時間</h2>
                 <p id="last-update">--</p>
+                <p id="crawl-time"></p>
+                <div id="error-container"></div>
+                <div id="retry-container" style="display: none;">
+                    <button class="retry-button" onclick="fetchOilPrices()">重新載入</button>
+                </div>
             </section>
         </main>
         
@@ -196,28 +241,86 @@
         });
 
         function fetchOilPrices() {
+            // 顯示載入中狀態
+            document.getElementById('last-update').textContent = '載入中...';
+            document.getElementById('error-container').innerHTML = '';
+            document.getElementById('retry-container').style.display = 'none';
+            
             // 從油價資料 JSON 檔案載入資料
             fetch('data/oil_prices.json?' + new Date().getTime())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('無法取得油價資料檔案');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     // 更新中油油價
-                    document.getElementById('cpc-92').textContent = data.cpc['92'] + ' 元';
-                    document.getElementById('cpc-95').textContent = data.cpc['95'] + ' 元';
-                    document.getElementById('cpc-98').textContent = data.cpc['98'] + ' 元';
-                    document.getElementById('cpc-diesel').textContent = data.cpc['diesel'] + ' 元';
+                    updatePriceDisplay('cpc-92', data.cpc['92']);
+                    updatePriceDisplay('cpc-95', data.cpc['95']);
+                    updatePriceDisplay('cpc-98', data.cpc['98']);
+                    updatePriceDisplay('cpc-diesel', data.cpc['diesel']);
                     
                     // 更新台塑油價
-                    document.getElementById('fpg-92').textContent = data.fpg['92'] + ' 元';
-                    document.getElementById('fpg-95').textContent = data.fpg['95'] + ' 元';
-                    document.getElementById('fpg-98').textContent = data.fpg['98'] + ' 元';
-                    document.getElementById('fpg-diesel').textContent = data.fpg['diesel'] + ' 元';
+                    updatePriceDisplay('fpg-92', data.fpg['92']);
+                    updatePriceDisplay('fpg-95', data.fpg['95']);
+                    updatePriceDisplay('fpg-98', data.fpg['98']);
+                    updatePriceDisplay('fpg-diesel', data.fpg['diesel']);
                     
                     // 更新最後更新時間
-                    document.getElementById('last-update').textContent = data.update_time;
+                    document.getElementById('last-update').textContent = data.update_time || '暫無資料';
+                    
+                    // 顯示爬蟲執行時間
+                    if (data.crawl_time) {
+                        document.getElementById('crawl-time').textContent = '資料更新於: ' + data.crawl_time;
+                    }
+                    
+                    // 如果有錯誤訊息，顯示它
+                    if (data.error) {
+                        document.getElementById('error-container').innerHTML = '<p class="error-message">爬蟲報告錯誤: ' + data.error + '</p>';
+                        document.getElementById('retry-container').style.display = 'block';
+                    }
+                    
+                    // 檢查是否所有資料都是"暫無資料"
+                    const allNoData = 
+                        data.cpc['92'] === '暫無資料' &&
+                        data.cpc['95'] === '暫無資料' &&
+                        data.cpc['98'] === '暫無資料' &&
+                        data.cpc['diesel'] === '暫無資料' &&
+                        data.fpg['92'] === '暫無資料' &&
+                        data.fpg['95'] === '暫無資料' &&
+                        data.fpg['98'] === '暫無資料' &&
+                        data.fpg['diesel'] === '暫無資料';
+                        
+                    if (allNoData) {
+                        document.getElementById('error-container').innerHTML += '<p class="error-message">未能取得任何油價資料，請稍後再試。</p>';
+                        document.getElementById('retry-container').style.display = 'block';
+                    }
                 })
                 .catch(error => {
                     console.error('無法取得油價資料:', error);
+                    document.getElementById('last-update').textContent = '資料載入失敗';
+                    document.getElementById('error-container').innerHTML = '<p class="error-message">' + error.message + '</p>';
+                    document.getElementById('retry-container').style.display = 'block';
                 });
+        }
+        
+        function updatePriceDisplay(elementId, priceValue) {
+            const element = document.getElementById(elementId);
+            
+            // 如果價格是"暫無資料"，添加特殊樣式
+            if (priceValue === '暫無資料') {
+                element.textContent = priceValue;
+                element.classList.add('temp-no-data');
+            } else {
+                // 檢查是否需要添加"元"字
+                if (priceValue && !priceValue.includes('元')) {
+                    element.textContent = priceValue + ' 元';
+                } else {
+                    element.textContent = priceValue;
+                }
+                element.classList.remove('temp-no-data');
+            }
         }
     </script>
 </body>
