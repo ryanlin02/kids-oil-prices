@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>小朋友加加油</title>
-    <!-- 內嵌 CSS -->
     <style>
+        /* CSS樣式開始 */
         * {
             margin: 0;
             padding: 0;
@@ -13,14 +13,14 @@
         }
 
         body {
-            font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: 'Microsoft JhengHei', '微軟正黑體', Arial, sans-serif;
             line-height: 1.6;
+            color: #333;
+            background-color: #f8f9fa;
         }
 
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -28,27 +28,34 @@
         header {
             text-align: center;
             margin-bottom: 30px;
+            padding: 20px 0;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #3498db;
         }
 
         h1 {
             font-size: 2.5rem;
-            color: #e74c3c;
-            padding: 15px 0;
-            border-bottom: 2px solid #e74c3c;
+            color: #2c3e50;
         }
 
         h2 {
             font-size: 1.8rem;
-            margin-bottom: 15px;
             color: #2c3e50;
+            margin-bottom: 15px;
         }
 
-        .oil-company {
+        .oil-price-section {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .company-section {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .price-grid {
@@ -59,108 +66,56 @@
 
         .price-item {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            padding: 10px 15px;
-            background-color: #f9f9f9;
+            padding: 15px 10px;
             border-radius: 5px;
-            border-left: 4px solid #3498db;
+            background-color: #f1f8fe;
         }
 
-        .oil-type {
+        .fuel-type {
             font-weight: bold;
+            margin-bottom: 5px;
         }
 
-        .oil-price {
-            font-size: 1.3rem;
-            font-weight: bold;
+        .price {
+            font-size: 1.5rem;
             color: #e74c3c;
-        }
-        
-        .temp-no-data {
-            color: #999;
-            font-style: italic;
+            font-weight: bold;
         }
 
-        .update-info {
+        .update-time {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
         }
 
         #last-update {
             font-size: 1.2rem;
             color: #7f8c8d;
         }
-        
-        #crawl-time {
-            font-size: 0.9rem;
-            color: #95a5a6;
-            margin-top: 5px;
-        }
 
         footer {
             text-align: center;
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 1px solid #ddd;
+            padding: 15px 0;
             color: #7f8c8d;
-        }
-
-        footer a {
-            color: #3498db;
-            text-decoration: none;
-        }
-
-        footer a:hover {
-            text-decoration: underline;
-        }
-
-        /* 適應小螢幕裝置 */
-        @media (max-width: 600px) {
-            .price-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            h2 {
-                font-size: 1.5rem;
-            }
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-style: italic;
-            color: #7f8c8d;
-        }
-        
-        .retry-button {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 8px 15px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
             font-size: 0.9rem;
         }
-        
-        .retry-button:hover {
-            background-color: #2980b9;
+
+        @media (min-width: 768px) {
+            .oil-price-section {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .company-section {
+                flex: 1;
+                min-width: 300px;
+            }
         }
-        
-        .error-message {
-            color: #e74c3c;
-            margin-top: 10px;
-            font-size: 0.9rem;
-        }
+        /* CSS樣式結束 */
     </style>
 </head>
 <body>
@@ -170,155 +125,104 @@
         </header>
         
         <main>
-            <section class="oil-company">
-                <h2>中油</h2>
-                <div class="price-grid">
-                    <div class="price-item">
-                        <span class="oil-type">92無鉛汽油</span>
-                        <span class="oil-price" id="cpc-92">--</span>
+            <section class="oil-price-section">
+                <div class="company-section">
+                    <h2>中油</h2>
+                    <div class="price-grid">
+                        <div class="price-item">
+                            <span class="fuel-type">92無鉛汽油</span>
+                            <span class="price" id="cpc-92">載入中...</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="fuel-type">95無鉛汽油</span>
+                            <span class="price" id="cpc-95">載入中...</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="fuel-type">98無鉛汽油</span>
+                            <span class="price" id="cpc-98">載入中...</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="fuel-type">超級柴油</span>
+                            <span class="price" id="cpc-diesel">載入中...</span>
+                        </div>
                     </div>
-                    <div class="price-item">
-                        <span class="oil-type">95無鉛汽油</span>
-                        <span class="oil-price" id="cpc-95">--</span>
-                    </div>
-                    <div class="price-item">
-                        <span class="oil-type">98無鉛汽油</span>
-                        <span class="oil-price" id="cpc-98">--</span>
-                    </div>
-                    <div class="price-item">
-                        <span class="oil-type">超級柴油</span>
-                        <span class="oil-price" id="cpc-diesel">--</span>
+                </div>
+
+                <div class="company-section">
+                    <h2>台塑</h2>
+                    <div class="price-grid">
+                        <div class="price-item">
+                            <span class="fuel-type">92無鉛汽油</span>
+                            <span class="price" id="fpg-92">載入中...</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="fuel-type">95無鉛汽油</span>
+                            <span class="price" id="fpg-95">載入中...</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="fuel-type">98無鉛汽油</span>
+                            <span class="price" id="fpg-98">載入中...</span>
+                        </div>
+                        <div class="price-item">
+                            <span class="fuel-type">超級柴油</span>
+                            <span class="price" id="fpg-diesel">載入中...</span>
+                        </div>
                     </div>
                 </div>
             </section>
             
-            <section class="oil-company">
-                <h2>台塑</h2>
-                <div class="price-grid">
-                    <div class="price-item">
-                        <span class="oil-type">92無鉛汽油</span>
-                        <span class="oil-price" id="fpg-92">--</span>
-                    </div>
-                    <div class="price-item">
-                        <span class="oil-type">95無鉛汽油</span>
-                        <span class="oil-price" id="fpg-95">--</span>
-                    </div>
-                    <div class="price-item">
-                        <span class="oil-type">98無鉛汽油</span>
-                        <span class="oil-price" id="fpg-98">--</span>
-                    </div>
-                    <div class="price-item">
-                        <span class="oil-type">超級柴油</span>
-                        <span class="oil-price" id="fpg-diesel">--</span>
-                    </div>
-                </div>
-            </section>
-            
-            <section class="update-info">
+            <section class="update-time">
                 <h2>更新時間</h2>
-                <p id="last-update">--</p>
-                <p id="crawl-time"></p>
-                <div id="error-container"></div>
-                <div id="retry-container" style="display: none;">
-                    <button class="retry-button" onclick="fetchOilPrices()">重新載入</button>
-                </div>
+                <p id="last-update">載入中...</p>
             </section>
         </main>
         
         <footer>
-            <p>資料來源：<a href="https://www2.moeaea.gov.tw/oil111/Gasoline/RetailPrice" target="_blank">經濟部能源署</a></p>
+            <p>資料來源：台灣中油、台塑石化官方網站</p>
         </footer>
     </div>
     
-    <!-- 內嵌 JavaScript -->
-    <!-- 在 index.html 中更新 JavaScript 部分 -->
     <script>
+        // JavaScript腳本開始
         document.addEventListener('DOMContentLoaded', function() {
-            // 載入油價資料
             fetchOilPrices();
-            
-            // 每隔一小時重新載入一次資料
-            setInterval(fetchOilPrices, 3600000);
         });
-    
-        function fetchOilPrices() {
-            // 顯示載入中的訊息
-            document.getElementById('cpc-92').textContent = "載入中...";
-            document.getElementById('cpc-95').textContent = "載入中...";
-            document.getElementById('cpc-98').textContent = "載入中...";
-            document.getElementById('cpc-diesel').textContent = "載入中...";
-            document.getElementById('fpg-92').textContent = "載入中...";
-            document.getElementById('fpg-95').textContent = "載入中...";
-            document.getElementById('fpg-98').textContent = "載入中...";
-            document.getElementById('fpg-diesel').textContent = "載入中...";
-            document.getElementById('last-update').textContent = "正在更新...";
-            
-            // 從油價資料 JSON 檔案載入資料
-            // 添加時間戳參數避免瀏覽器緩存
-            fetch('data/oil_prices.json?' + new Date().getTime())
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('網路回應不正常: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("獲取的資料:", data);
-                    
-                    // 更新中油油價
-                    document.getElementById('cpc-92').textContent = data.cpc['92'] + (data.cpc['92'] !== '暫無資料' ? ' 元' : '');
-                    document.getElementById('cpc-95').textContent = data.cpc['95'] + (data.cpc['95'] !== '暫無資料' ? ' 元' : '');
-                    document.getElementById('cpc-98').textContent = data.cpc['98'] + (data.cpc['98'] !== '暫無資料' ? ' 元' : '');
-                    document.getElementById('cpc-diesel').textContent = data.cpc['diesel'] + (data.cpc['diesel'] !== '暫無資料' ? ' 元' : '');
-                    
-                    // 更新台塑油價
-                    document.getElementById('fpg-92').textContent = data.fpg['92'] + (data.fpg['92'] !== '暫無資料' ? ' 元' : '');
-                    document.getElementById('fpg-95').textContent = data.fpg['95'] + (data.fpg['95'] !== '暫無資料' ? ' 元' : '');
-                    document.getElementById('fpg-98').textContent = data.fpg['98'] + (data.fpg['98'] !== '暫無資料' ? ' 元' : '');
-                    document.getElementById('fpg-diesel').textContent = data.fpg['diesel'] + (data.fpg['diesel'] !== '暫無資料' ? ' 元' : '');
-                    
-                    // 更新最後更新時間
-                    document.getElementById('last-update').textContent = data.update_time || '暫無資料';
-                    
-                    // 更新爬蟲執行時間
-                    if (data.crawl_time) {
-                        document.getElementById('crawl-time').textContent = "資料更新時間: " + data.crawl_time;
-                    }
-                    
-                    // 如果有備註，顯示備註
-                    if (data.note) {
-                        let noteElement = document.createElement('p');
-                        noteElement.style.fontSize = '0.8rem';
-                        noteElement.style.color = '#666';
-                        noteElement.textContent = "備註: " + data.note;
-                        document.getElementById('last-update').parentNode.appendChild(noteElement);
-                    }
-                    
-                    // 如果有錯誤訊息，顯示在頁面上
-                    if (data.error) {
-                        let errorMsg = document.createElement('p');
-                        errorMsg.className = 'error-message';
-                        errorMsg.textContent = '發生錯誤：' + data.error;
-                        document.getElementById('error-container').innerHTML = '';
-                        document.getElementById('error-container').appendChild(errorMsg);
-                        document.getElementById('retry-container').style.display = 'block';
-                    } else {
-                        document.getElementById('error-container').innerHTML = '';
-                        document.getElementById('retry-container').style.display = 'none';
-                    }
-                })
-                .catch(error => {
-                    console.error('無法取得油價資料:', error);
-                    document.getElementById('last-update').textContent = '無法取得資料，請檢查網絡連接';
-                    
-                    let errorMsg = document.createElement('p');
-                    errorMsg.className = 'error-message';
-                    errorMsg.textContent = '發生錯誤：' + error.message;
-                    document.getElementById('error-container').innerHTML = '';
-                    document.getElementById('error-container').appendChild(errorMsg);
-                    document.getElementById('retry-container').style.display = 'block';
+
+        async function fetchOilPrices() {
+            try {
+                const response = await fetch('oil_prices.json');
+                if (!response.ok) {
+                    throw new Error('無法獲取油價資料');
+                }
+                
+                const data = await response.json();
+                updatePriceDisplay(data);
+            } catch (error) {
+                console.error('載入油價失敗:', error);
+                document.querySelectorAll('.price').forEach(element => {
+                    element.textContent = '資料載入失敗';
                 });
+                document.getElementById('last-update').textContent = '資料載入失敗';
+            }
         }
+
+        function updatePriceDisplay(data) {
+            // 更新中油價格
+            document.getElementById('cpc-92').textContent = `$${data.cpc.gasoline_92} 元/公升`;
+            document.getElementById('cpc-95').textContent = `$${data.cpc.gasoline_95} 元/公升`;
+            document.getElementById('cpc-98').textContent = `$${data.cpc.gasoline_98} 元/公升`;
+            document.getElementById('cpc-diesel').textContent = `$${data.cpc.diesel} 元/公升`;
+            
+            // 更新台塑價格
+            document.getElementById('fpg-92').textContent = `$${data.fpg.gasoline_92} 元/公升`;
+            document.getElementById('fpg-95').textContent = `$${data.fpg.gasoline_95} 元/公升`;
+            document.getElementById('fpg-98').textContent = `$${data.fpg.gasoline_98} 元/公升`;
+            document.getElementById('fpg-diesel').textContent = `$${data.fpg.diesel} 元/公升`;
+            
+            // 更新更新時間
+            document.getElementById('last-update').textContent = data.update_time;
+        }
+        // JavaScript腳本結束
     </script>
 </body>
 </html>
