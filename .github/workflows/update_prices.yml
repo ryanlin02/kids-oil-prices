@@ -6,6 +6,10 @@ on:
     - cron: '0 0,8,16 * * *'
   workflow_dispatch:  # 允許手動觸發工作流程
 
+# 添加明確的權限設置
+permissions:
+  contents: write  # 這給予工作流程對儲存庫內容的寫入權限
+
 jobs:
   update-prices:
     runs-on: ubuntu-latest
@@ -51,7 +55,7 @@ jobs:
             else
               git commit -m "自動更新油價資料 $(date +'%Y-%m-%d %H:%M:%S')"
               
-              # 推送變更
+              # 直接使用內建的 GITHUB_TOKEN 推送變更
               git push
             fi
           else
