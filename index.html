@@ -242,7 +242,7 @@
         });
     
         function fetchOilPrices() {
-            // 顯示載入中
+            // 顯示載入中的訊息
             document.getElementById('cpc-92').textContent = "載入中...";
             document.getElementById('cpc-95').textContent = "載入中...";
             document.getElementById('cpc-98').textContent = "載入中...";
@@ -280,7 +280,7 @@
                     // 更新最後更新時間
                     document.getElementById('last-update').textContent = data.update_time || '暫無資料';
                     
-                    // 顯示爬蟲執行時間
+                    // 更新爬蟲執行時間
                     if (data.crawl_time) {
                         document.getElementById('crawl-time').textContent = "資料更新時間: " + data.crawl_time;
                     }
@@ -288,7 +288,7 @@
                     // 如果有備註，顯示備註
                     if (data.note) {
                         let noteElement = document.createElement('p');
-                        noteElement.style.fontSize = '0.9rem';
+                        noteElement.style.fontSize = '0.8rem';
                         noteElement.style.color = '#666';
                         noteElement.textContent = "備註: " + data.note;
                         document.getElementById('last-update').parentNode.appendChild(noteElement);
@@ -299,6 +299,7 @@
                         let errorMsg = document.createElement('p');
                         errorMsg.className = 'error-message';
                         errorMsg.textContent = '發生錯誤：' + data.error;
+                        document.getElementById('error-container').innerHTML = '';
                         document.getElementById('error-container').appendChild(errorMsg);
                         document.getElementById('retry-container').style.display = 'block';
                     } else {
@@ -313,6 +314,7 @@
                     let errorMsg = document.createElement('p');
                     errorMsg.className = 'error-message';
                     errorMsg.textContent = '發生錯誤：' + error.message;
+                    document.getElementById('error-container').innerHTML = '';
                     document.getElementById('error-container').appendChild(errorMsg);
                     document.getElementById('retry-container').style.display = 'block';
                 });
