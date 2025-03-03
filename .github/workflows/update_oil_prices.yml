@@ -28,8 +28,7 @@ jobs:
           python scrape_oil_prices.py
       
       - name: Commit and push if changed
-        run: |
-          git config --global user.name 'GitHub Actions Bot'
-          git config --global user.email 'actions@github.com'
-          git add oil_prices.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "更新油價資料 - $(date +'%Y-%m-%d %H:%M:%S')" && git push)
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "更新油價資料 - 自動更新"
+          file_pattern: oil_prices.json
