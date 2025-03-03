@@ -9,6 +9,8 @@ on:
 jobs:
   update-oil-prices:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 給予寫入權限
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -26,9 +28,39 @@ jobs:
       - name: Run scraper
         run: |
           python scrape_oil_prices.py
+        # 將爬蟲輸出保存到日誌中
+        continue-on-error: true
       
-      - name: Commit and push if changed
+      # 檢查油價資料檔案是否創建成功
+      - name: Check if oil_prices.json exists
+        id: check_file
+        run: |
+          if [ -f "oil_prices.json" ]; then
+            echo "file_exists=true" >> $GITHUB_OUTPUT
+            cat oil_prices.json  # 輸出檔案內容到日誌
+          else
+            echo "file_exists=false" >> $GITHUB_OUTPUT
+            echo "oil_prices.json 檔案不存在，創建預設值"
+            echo '{
+              "cpc": {
+                "gasoline_92": "29.0",
+                "gasoline_95": "30.5",
+                "gasoline_98": "32.5",
+                "diesel": "27.0"
+              },
+              "fpg": {
+                "gasoline_92": "29.0",
+                "gasoline_95": "30.5",
+                "gasoline_98": "32.5",
+                "diesel": "27.0"
+              },
+              "update_time": "爬蟲失敗，顯示預設值 (手動更新時間: '"$(date +'%Y-%m-%d %H:%M:%S')"')"
+            }' > oil_prices.json
+          fi
+      
+      # 使用特定的 Action 來處理提交和推送
+      - name: Commit and push changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "更新油價資料 - 自動更新"
+          commit_message: "更新油價資料 - ${{ github.workflow }} 運行"
           file_pattern: oil_prices.json
