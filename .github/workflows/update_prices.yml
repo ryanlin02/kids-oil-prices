@@ -24,20 +24,37 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 pytz
           
-      - name: 執行爬蟲更新油價
+      - name: 確保 data 資料夾存在
         run: |
           mkdir -p data
+          touch data/.gitkeep
+          
+      - name: 執行爬蟲更新油價
+        run: |
           python scripts/fetch_oil_prices.py
           
-      - name: 提交更新的資料
+      - name: 檢查油價檔案是否存在並提交更新
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add data/oil_prices.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "自動更新油價資料 $(date +'%Y-%m-%d %H:%M:%S')"
           
-      - name: 推送變更
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+          # 先檢查 data 資料夾是否已被追蹤
+          git add data/.gitkeep
+          
+          # 檢查油價檔案是否存在
+          if [ -f "data/oil_prices.json" ]; then
+            git add data/oil_prices.json
+            
+            # 檢查是否有變更需要提交
+            if git diff --staged --quiet; then
+              echo "沒有變更需要提交"
+            else
+              git commit -m "自動更新油價資料 $(date +'%Y-%m-%d %H:%M:%S')"
+              
+              # 推送變更
+              git push
+            fi
+          else
+            echo "油價檔案不存在，可能爬蟲執行失敗"
+            exit 1
+          fi
